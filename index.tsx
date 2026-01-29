@@ -3,16 +3,35 @@ import { GoogleGenAI } from "@google/genai";
 
 // --- CONFIG & STATE ---
 const NAME = "Sifat";
-const TARGET_DATE = (() => {
+const BIRTH_MONTH = 0; // January (0-indexed)
+const BIRTH_DAY = 30;
+
+const getDates = () => {
     const now = new Date();
     const currentYear = now.getFullYear();
-    const target = new Date(currentYear, 0, 30, 0, 0, 0); // Jan 30
-    if (now > target) target.setFullYear(currentYear + 1);
-    return target;
-})();
+    
+    // The exact moment the birthday starts (12:00 AM)
+    const targetThisYear = new Date(currentYear, BIRTH_MONTH, BIRTH_DAY, 0, 0, 0);
+    // The moment the birthday ends (11:59:59 PM)
+    const endOfBirthday = new Date(currentYear, BIRTH_MONTH, BIRTH_DAY, 23, 59, 59);
+    
+    let targetDate = targetThisYear;
+    let isBirthdayToday = false;
+
+    if (now > endOfBirthday) {
+        // If today is after Jan 30th, target next year
+        targetDate = new Date(currentYear + 1, BIRTH_MONTH, BIRTH_DAY, 0, 0, 0);
+    } else if (now >= targetThisYear && now <= endOfBirthday) {
+        // It is currently Jan 30th!
+        isBirthdayToday = true;
+    }
+
+    return { targetDate, isBirthdayToday };
+};
 
 // --- DOM ELEMENTS ---
-const elements = {
+// Using a function to get elements to ensure they exist when called
+const getElements = () => ({
     countdown: document.getElementById('section-countdown'),
     envelope: document.getElementById('section-envelope'),
     card: document.getElementById('section-card'),
@@ -25,10 +44,13 @@ const elements = {
     envelopeUi: document.getElementById('envelope-ui'),
     aiMessage: document.getElementById('ai-message'),
     seal: document.getElementById('seal')
-};
+});
 
 // --- FLOATING HEARTS SYSTEM ---
 function initHearts() {
+    const container = document.getElementById('hearts-container');
+    if (!container) return;
+
     setInterval(() => {
         const heart = document.createElement('div');
         heart.className = 'heart-particle text-rose-300';
@@ -38,15 +60,40 @@ function initHearts() {
         heart.style.animationDuration = (5 + Math.random() * 10) + 's';
         heart.style.opacity = (0.1 + Math.random() * 0.4).toString();
         
-        elements.heartsContainer.appendChild(heart);
+        container.appendChild(heart);
         setTimeout(() => heart.remove(), 15000);
     }, 1500);
 }
 
+// --- NAVIGATION ---
+function showSection(sectionName: 'countdown' | 'envelope' | 'card') {
+    const el = getElements();
+    if (!el.countdown || !el.envelope || !el.card) return;
+
+    el.countdown.classList.add('hidden');
+    el.envelope.classList.add('hidden');
+    el.card.classList.add('hidden');
+
+    if (sectionName === 'countdown') el.countdown.classList.remove('hidden');
+    if (sectionName === 'envelope') el.envelope.classList.remove('hidden');
+    if (sectionName === 'card') {
+        el.card.classList.remove('hidden');
+        generateMessage();
+    }
+}
+
 // --- COUNTDOWN LOGIC ---
 function updateCountdown() {
+    const el = getElements();
+    const { targetDate, isBirthdayToday } = getDates();
+
+    if (isBirthdayToday) {
+        showSection('envelope');
+        return true;
+    }
+
     const now = new Date();
-    const diff = TARGET_DATE.getTime() - now.getTime();
+    const diff = targetDate.getTime() - now.getTime();
 
     if (diff <= 0) {
         showSection('envelope');
@@ -58,69 +105,65 @@ function updateCountdown() {
     const m = Math.floor((diff / (1000 * 60)) % 60);
     const s = Math.floor((diff / 1000) % 60);
 
-    elements.days.textContent = String(d).padStart(2, '0');
-    elements.hours.textContent = String(h).padStart(2, '0');
-    elements.minutes.textContent = String(m).padStart(2, '0');
-    elements.seconds.textContent = String(s).padStart(2, '0');
+    if (el.days) el.days.textContent = String(d).padStart(2, '0');
+    if (el.hours) el.hours.textContent = String(h).padStart(2, '0');
+    if (el.minutes) el.minutes.textContent = String(m).padStart(2, '0');
+    if (el.seconds) el.seconds.textContent = String(s).padStart(2, '0');
+    
     return false;
-}
-
-// --- NAVIGATION ---
-function showSection(sectionName: 'countdown' | 'envelope' | 'card') {
-    elements.countdown.classList.add('hidden');
-    elements.envelope.classList.add('hidden');
-    elements.card.classList.add('hidden');
-
-    if (sectionName === 'countdown') elements.countdown.classList.remove('hidden');
-    if (sectionName === 'envelope') elements.envelope.classList.remove('hidden');
-    if (sectionName === 'card') {
-        elements.card.classList.remove('hidden');
-        generateMessage();
-    }
 }
 
 // --- AI MESSAGE GENERATION ---
 async function generateMessage() {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const el = getElements();
+    // Safety check for API Key in browser environments
+    const apiKey = typeof process !== 'undefined' && process.env ? process.env.API_KEY : '';
+    
+    if (!apiKey) {
+        if (el.aiMessage) el.aiMessage.textContent = `To my dearest ${NAME}, every moment with you is a treasure. Happy Birthday!`;
+        return;
+    }
+
     try {
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
-            contents: `Write a poetic, deeply romantic, and soul-stirring birthday letter for Sifat. 
+            contents: `Write a poetic, deeply romantic, and soul-stirring birthday letter for ${NAME}. 
                        It should be about 60-80 words, mentioning her special day (Jan 30th). 
                        Keep it elegant and heartfelt.`
         });
         
-        const text = response.text || "To my dearest Sifat, every heartbeat of mine wishes you the most magical birthday. You are the light that Jan 30th was made to celebrate.";
-        elements.aiMessage.innerHTML = text.replace(/\n/g, '<br>');
+        const text = response.text || `To my dearest ${NAME}, you are the light of my life. Happy Birthday!`;
+        if (el.aiMessage) el.aiMessage.innerHTML = text.replace(/\n/g, '<br>');
     } catch (error) {
         console.error("AI Error:", error);
-        elements.aiMessage.textContent = "To my dearest Sifat, on your special day, I want you to know how much you are loved. Every moment with you is a gift. Happy Birthday!";
+        if (el.aiMessage) el.aiMessage.textContent = `To my dearest ${NAME}, on your special day, I want you to know how much you are loved. Every moment with you is a gift. Happy Birthday!`;
     }
 }
 
 // --- INITIALIZATION ---
-initHearts();
+window.addEventListener('DOMContentLoaded', () => {
+    initHearts();
+    const el = getElements();
 
-// Check countdown every second
-const timerInterval = setInterval(() => {
-    const isFinished = updateCountdown();
-    if (isFinished) clearInterval(timerInterval);
-}, 1000);
+    // Set up envelope click
+    if (el.envelopeTrigger) {
+        el.envelopeTrigger.addEventListener('click', () => {
+            if (el.envelopeUi) el.envelopeUi.classList.add('open');
+            if (el.seal) el.seal.classList.add('hidden');
+            
+            setTimeout(() => {
+                showSection('card');
+            }, 1500);
+        });
+    }
 
-// Envelope click event
-elements.envelopeTrigger.addEventListener('click', () => {
-    elements.envelopeUi.classList.add('open');
-    elements.seal.classList.add('hidden');
-    
-    // Smooth transition to the card
-    setTimeout(() => {
-        showSection('card');
-    }, 1500);
+    // Start timer loop
+    const initialCheck = updateCountdown();
+    if (!initialCheck) {
+        const timerInterval = setInterval(() => {
+            const isFinished = updateCountdown();
+            if (isFinished) clearInterval(timerInterval);
+        }, 1000);
+    }
 });
-
-// Initial check
-if (new Date() >= TARGET_DATE) {
-    showSection('envelope');
-} else {
-    updateCountdown();
-}
