@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For My Sifat ❤️</title>
+    <title>Sifat's 22nd Birthday ❤️</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -28,6 +28,16 @@
             pointer-events: none;
             animation: float linear infinite;
             bottom: -50px;
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
         }
 
         /* Envelope Styles */
@@ -88,6 +98,17 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .milestone-badge {
+            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
     </style>
     <script type="importmap">
     {
@@ -98,14 +119,16 @@
     </script>
 </head>
 <body class="bg-gradient-to-br from-rose-50 via-white to-pink-50 min-h-screen overflow-hidden flex items-center justify-center p-4">
+    <canvas id="confetti-canvas"></canvas>
     <div id="hearts-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
     <main id="main-content" class="relative z-10 w-full max-w-4xl text-center">
         <!-- Countdown Section -->
         <section id="section-countdown" class="fade-in space-y-8">
             <header class="space-y-4">
-                <h1 class="text-3xl md:text-5xl font-elegant font-bold text-rose-700">A Special Surprise is Coming...</h1>
-                <p class="text-rose-400 font-romantic text-2xl md:text-3xl italic">Wait for it, Sifat ❤️</p>
+                <div class="milestone-badge font-elegant tracking-widest text-sm uppercase">The 22nd Chapter</div>
+                <h1 class="text-3xl md:text-5xl font-elegant font-bold text-rose-700">A Special Surprise for Your 22nd...</h1>
+                <p class="text-rose-400 font-romantic text-2xl md:text-3xl italic">Just a moment more, Sifat ❤️</p>
             </header>
             <div id="timer" class="flex flex-wrap justify-center items-center gap-4">
                 <div class="flex flex-col items-center">
@@ -133,53 +156,57 @@
                     <span class="text-xs uppercase tracking-widest text-rose-400 mt-2 font-semibold">Sec</span>
                 </div>
             </div>
-            <p class="text-rose-300 text-sm tracking-widest uppercase mt-8 opacity-60">Counting down to Jan 30th</p>
+            <p class="text-rose-300 text-sm tracking-widest uppercase mt-8 opacity-60">Counting down to Jan 30th • 22 Years of Grace</p>
         </section>
 
         <!-- Envelope Section -->
         <section id="section-envelope" class="hidden fade-in flex flex-col items-center">
-            <h1 class="mb-12 text-3xl md:text-5xl font-elegant font-bold text-rose-700 px-4">It's Time! 🎂</h1>
+            <h1 class="mb-12 text-3xl md:text-5xl font-elegant font-bold text-rose-700 px-4">Happy 22nd Birthday! 🎂</h1>
             <div id="envelope-trigger" class="envelope-wrapper">
                 <div id="envelope-ui" class="envelope">
                     <div class="top-flap"></div>
                     <div class="side-flaps"></div>
                     <div class="letter">
-                        <p class="font-romantic text-rose-600 text-lg">For Sifat...</p>
+                        <p class="font-romantic text-rose-600 text-lg">My Dearest Sifat...</p>
                     </div>
                     <div id="seal" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 text-4xl animate-bounce">❤️</div>
                 </div>
             </div>
-            <p class="mt-8 text-rose-500 font-romantic text-2xl animate-pulse">Click to open your surprise</p>
+            <p class="mt-8 text-rose-500 font-romantic text-2xl animate-pulse">Open your 22nd birthday wish</p>
         </section>
 
         <!-- Card Section -->
         <section id="section-card" class="hidden max-w-2xl w-full mx-auto px-4 py-8 fade-in">
             <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-rose-100 relative">
                 <div class="h-48 md:h-64 relative">
-                    <img src="https://images.unsplash.com/photo-1530103862676-fa8c9d343165?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover" alt="Birthday decoration">
+                    <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover" alt="Birthday decoration">
                     <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
+                    <div class="absolute top-4 right-4 flex flex-col items-center">
+                        <span class="text-5xl font-elegant font-bold text-rose-600 drop-shadow-md">22</span>
+                        <span class="text-xs font-bold text-rose-400 uppercase tracking-widest">Years</span>
+                    </div>
                     <h1 class="absolute bottom-4 left-0 w-full text-4xl md:text-6xl font-romantic font-bold text-rose-600">Happy Birthday Sifat!</h1>
                 </div>
                 <div class="p-8 md:p-12 space-y-6">
                     <div class="inline-block relative">
-                        <span class="text-5xl">🎂</span>
-                        <div class="absolute -top-4 -right-4 animate-bounce">🎈</div>
+                        <span class="text-5xl">🥂</span>
+                        <div class="absolute -top-4 -right-4 animate-bounce">✨</div>
                     </div>
                     <div id="ai-message" class="italic text-rose-800 leading-relaxed font-elegant text-lg md:text-xl min-h-[100px]">
-                        Thinking of the perfect words for you...
+                        Crafting a beautiful wish for your 22nd year...
                     </div>
                     <div class="pt-8 border-t border-rose-50">
-                        <p class="text-rose-400 font-romantic text-2xl">With all my love ❤️</p>
+                        <p class="text-rose-400 font-romantic text-2xl">Forever yours ❤️</p>
                     </div>
                 </div>
-                <div class="absolute top-2 left-2 text-2xl rotate-12">✨</div>
-                <div class="absolute top-2 right-2 text-2xl -rotate-12">✨</div>
+                <div class="absolute top-2 left-2 text-2xl rotate-12">🎁</div>
+                <div class="absolute top-2 right-2 text-2xl -rotate-12">🎈</div>
             </div>
         </section>
     </main>
 
     <footer class="fixed bottom-4 text-center opacity-30">
-        <p class="text-xs text-rose-400 font-medium tracking-widest">MADE WITH LOVE FOR SIFAT</p>
+        <p class="text-xs text-rose-400 font-medium tracking-widest uppercase">For Sifat on her 22nd • Jan 30</p>
     </footer>
 
     <script type="module" src="script.js"></script>
